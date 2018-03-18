@@ -9,7 +9,7 @@ from twisted.enterprise import adbapi
 import MySQLdb
 import MySQLdb.cursors
 from urllib import quote
-from tieba.items import ThreadItem, PostItem, CommentItem
+from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
 
 class TiebaPipeline(object):
     @classmethod
@@ -57,7 +57,8 @@ class TiebaPipeline(object):
         _conditional_insert = {
             'thread': self.insert_thread, 
             'post': self.insert_post, 
-            'comment': self.insert_comment
+            'comment': self.insert_comment,
+            'user': self.insert_user
         }
         query = self.dbpool.runInteraction(_conditional_insert[item.name], item)
         query.addErrback(self._handle_error, item, spider)
@@ -71,19 +72,25 @@ class TiebaPipeline(object):
         tx.execute(sql, params)     
         
     def insert_post(self, tx, item):
-        sql = "insert into post values(%s, %s, %s, %s, %s, %s, %s) on duplicate key\
+        sql = "insert into post values(%s, %s, %s, %s, %s, %s, %s, %s) on duplicate key\
         update content=values(content), comment_num=values(comment_num)"
         # 楼中楼数量和content(解析方式)可能变化，其余一般不变
         params = (item["id"], item["floor"], item['author'], item['content'], 
-            item['time'], item['comment_num'], item['thread_id'])
+            item['time'], item['comment_num'], item['thread_id'], item['user_id'])
         tx.execute(sql, params)
         
     def insert_comment(self, tx, item):
         tx.execute('set names utf8mb4')
-        sql = "insert into comment values(%s, %s, %s, %s, %s) on duplicate key update content=values(content)"
-        params = (item["id"], item['author'], item['content'], item['time'], item['post_id'])
+        sql = "insert into comment values(%s, %s, %s, %s, %s, %s) on duplicate key update content=values(content)"
+        params = (item["id"], item['author'], item['content'], item['time'], item['post_id'], item['user_id'])
         tx.execute(sql, params)
         
+    def insert_user(self, tx, item):
+        tx.execute('set names utf8mb4')
+        sql = "insert into user values(%s, %s, %s, %s, %s) on duplicate key update posts_num=values(posts_num)"
+        params = (item["username"], item['sex'], item['years_registered'], item['posts_num'], item['user_id'])
+        tx.execute(sql, params)
+
     #错误处理方法
     def _handle_error(self, fail, item, spider):
         spider.logger.error('Insert to database error: %s \

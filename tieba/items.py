@@ -25,6 +25,7 @@ class PostItem(scrapy.Item):
     time = scrapy.Field()
     comment_num = scrapy.Field()
     thread_id = scrapy.Field()
+    user_id = scrapy.Field()
 
 class CommentItem(scrapy.Item):
     name = 'comment'
@@ -33,3 +34,13 @@ class CommentItem(scrapy.Item):
     content = scrapy.Field()
     time = scrapy.Field()
     post_id = scrapy.Field()
+    user_id = scrapy.Field()
+
+class UserItem(scrapy.Item):
+    name = 'user'
+    username = scrapy.Field()
+    sex = scrapy.Field()
+    years_registered = scrapy.Field()
+    posts_num = scrapy.Field()
+    user_id = scrapy.Field()
+

@@ -74,11 +74,21 @@ def init_database(host, user, passwd, dbname):
         good BOOL, PRIMARY KEY (id)) CHARSET=utf8mb4;")
     tx.execute("create table if not exists post(\
         id BIGINT(12), floor INT(4), author VARCHAR(30), content TEXT,\
-        time DATETIME, comment_num INT(4), thread_id BIGINT(12),PRIMARY KEY (id),\
-        FOREIGN KEY (thread_id) REFERENCES thread(id)) CHARSET=utf8mb4;")
+        time DATETIME, comment_num INT(4), thread_id BIGINT(12),\
+        user_id BIGINT, PRIMARY KEY (id),\
+        FOREIGN KEY (thread_id) REFERENCES thread(id),\
+        FOREIGN KEY (user_id) REFERENCES user(user_id)\
+        ) CHARSET=utf8mb4;")
     tx.execute("create table if not exists comment(id BIGINT(12),\
         author VARCHAR(30), content TEXT, time DATETIME, post_id BIGINT(12),\
-        PRIMARY KEY (id), FOREIGN KEY (post_id) REFERENCES post(id)) CHARSET=utf8mb4;")
+        user_id BIGINT,\
+        PRIMARY KEY (id), FOREIGN KEY (post_id) REFERENCES post(id),\
+        FOREIGN KEY (user_id) REFERENCES user(user_id)\
+        ) CHARSET=utf8mb4;")
+    tx.execute("create table if not exists user(username VARCHAR(30),\
+        sex VARCHAR(6), years_registered FLOAT, posts_num INT(11),\
+        user_id BIGINT,\
+        PRIMARY KEY (user_id)) CHARSET=utf8mb4;")
     db.commit()
     db.close()
     warnings.resetwarnings()
