@@ -6,6 +6,8 @@ from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
 import helper
 import time
 import urlparse
+import logging
+from scrapy.utils.log import configure_logging
 
 class TiebaSpider(scrapy.Spider):
     name = "tieba"
@@ -13,6 +15,14 @@ class TiebaSpider(scrapy.Spider):
     end_page = 9999
     filter = None
     see_lz = False
+    
+    configure_logging(install_root_handler=False)
+    logging.basicConfig(
+        filename='log.txt',
+        format='%(levelname)s: %(message)s',
+        level=logging.INFO
+    )    
+    
     
     def parse(self, response): #forum parser
         for sel in response.xpath('//li[contains(@class, "j_thread_list")]'):
@@ -28,7 +38,7 @@ class TiebaSpider(scrapy.Spider):
             if self.filter and not self.filter(item["id"], item["title"], item['author'], item['reply_num'], item['good']):
                 continue
             #filter过滤掉的帖子及其回复均不存入数据库
-                
+               
             yield item
             meta = {'thread_id': data['id'], 'page': 1}
             url = 'http://tieba.baidu.com/p/%d' % data['id']
@@ -58,11 +68,11 @@ class TiebaSpider(scrapy.Spider):
                 item['content'] = helper.parse_content(content, True)
                 #以前的帖子, data-field里面没有thread_id
                 item['thread_id'] = meta['thread_id']
-                item['floor'] = data['content']['post_no']
-                user_uri = floor.xpath("//a[@class='p_author_name j_user_card']/@href").extract_first()
-                #item['name_url'] = self._parse_user_url_un(user_uri)
-                #item['name_url'] = self._parse_user_url_un(data['author']['name_u'])
-                item['user_id'] = data['author']['user_id']
+                item['floor'] = data['content']['post_no'] 
+                if 'user_id' in data['author'].keys():
+                    item['user_id'] = data['author']['user_id']
+                else:
+                    item['user_id'] = None
                 #只有以前的帖子, data-field里面才有date
                 if 'date' in data['content'].keys():
                     item['time'] = data['content']['date']
@@ -70,11 +80,10 @@ class TiebaSpider(scrapy.Spider):
                 else:
                     item['time'] = floor.xpath(".//span[@class='tail-info']")\
                     .re_first(r'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}')
-                # petter testar lägga in user 
+                user_uri = floor.xpath(".//a[@class='p_author_name j_user_card']/@href").extract_first() 
                 if user_uri:
                     url = 'http://tieba.baidu.com%s' % user_uri
-                    yield scrapy.Request(url, callback = self.parse_user, meta = meta)
-                # petter slutar testa lägga in user
+                    yield scrapy.Request(url, callback = self.parse_user)
                 yield item
         if has_comment:
             url = "http://tieba.baidu.com/p/totalComment?tid=%d&fid=1&pn=%d" % (meta['thread_id'], meta['page'])
@@ -100,27 +109,28 @@ class TiebaSpider(scrapy.Spider):
                 item['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(comment['now_time']))
                 item['user_id'] = comment['user_id']
                 yield item
+                url = 'http://tieba.baidu.com/home/main?un=%s' % comment['username']
+                yield scrapy.Request(url, callback = self.parse_user)
 
     def parse_user(self, response):
-        item = UserItem()
-        item['username'] = response.xpath("//span[@class='userinfo_username ']/text()").extract_first()
-        item['sex'] = response.xpath("//div[@class='userinfo_userdata']/span[1]/@class").extract_first()[26:]
-        item['years_registered'] = self._parse_user_age(response)
-        item['posts_num'] = self._parse_user_posts_num(response)
-        #item['name_url'] = self._parse_user_url_un(response.request.url)
-        item['user_id'] = response.xpath("//a[contains(@class, 'btn_sendmsg')]/@href").extract_first()[15:]
-        yield item
+        if response.url != 'http://static.tieba.baidu.com/tb/error.html?ErrType=1': 
+            item = UserItem()
+            item['username'] = response.xpath("//span[@class='userinfo_username ']/text()").extract_first()
+            item['sex'] = response.xpath("//div[@class='userinfo_userdata']/span[1]/@class").extract_first()[26:]
+            item['years_registered'] = self._parse_user_age(response)
+            item['posts_num'] = self._parse_user_posts_num(response)
+            item['user_id'] = response.xpath("//a[contains(@class, 'btn_sendmsg')]/@href").extract_first()[15:]
+            yield item
 
     def _parse_user_age(self, response):
         """Helper function tp get user age on tieba
         :returns: user age decimal / float
         """
-
         return scrapy.Selector(response).css('.user_name span:nth-child(2)::text').extract_first()[3:-1] or 0# 吧龄:(X)X.X年
 
     def _parse_user_posts_num(self, response):
         """ Helper function to get number of posts in a user profile. 
-        character 万indicates 1000 posts. only 10000 posts are decimal. DOES NOT WORK - some have even numbers for 10000s and they slip through. 
+        character 万indicates 10000 posts. 
         :returns: numberofposts int
         """
         num = scrapy.Selector(response).css('.userinfo_userdata span:nth-child(4)::text').extract_first()[3:] # 发贴:(X)X.X万
@@ -129,16 +139,6 @@ class TiebaSpider(scrapy.Spider):
             return num if self._is_number(num) is True else float(num[:-1]) * 10000
         else:
             return 0
-
-    def _parse_user_url_un(self, url):
-        """
-        Helper function to retrieve un parameter from url.
-        """
-	if url:
-            parsed = urlparse.urlparse(url)
-            return urlparse.parse_qs(parsed.query)['un'][0]
-        else:
-            return None
     
     def _is_number(self, s):
         try:
