@@ -6,9 +6,9 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 from twisted.enterprise import adbapi
-import MySQLdb
-import MySQLdb.cursors
-from urllib import quote
+import pymysql
+import pymysql.cursors
+from urllib.parse import quote
 from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
 
 class TiebaPipeline(object):
@@ -23,18 +23,18 @@ class TiebaPipeline(object):
             raise ValueError("No database name!")
         if not tbname.strip():
             raise ValueError("No tieba name!")          
-        if isinstance(tbname, unicode):
+        if isinstance(tbname, str):
             settings['TIEBA_NAME'] = tbname.encode('utf8')
 
         self.settings = settings
         
-        self.dbpool = adbapi.ConnectionPool('MySQLdb',
+        self.dbpool = adbapi.ConnectionPool('pymysql',
             host=settings['MYSQL_HOST'],
             db=settings['MYSQL_DBNAME'],
             user=settings['MYSQL_USER'],
             passwd=settings['MYSQL_PASSWD'],
             charset='utf8mb4',
-            cursorclass = MySQLdb.cursors.DictCursor,
+            cursorclass = pymysql.cursors.DictCursor,
             init_command = 'set foreign_key_checks=0' #异步容易冲突
         )
         

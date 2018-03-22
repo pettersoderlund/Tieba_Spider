@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
-import urllib2
+import urllib.request
 from bs4 import BeautifulSoup
-import emotion
+from . import emotion
 
 
 def is_ad(s): #判断楼层是否为广告
@@ -43,7 +43,7 @@ def is_str(s):
     if s.name: 
         return False
     #NavigableString类型需要手动转换下
-    return unicode(s)
+    return str(s)
 
 def is_br(s):
     if s.name == 'br':
@@ -53,12 +53,12 @@ def is_br(s):
 def is_img(s):
     # 处理了部分表情
     if s.name == 'img':
-        src = unicode(s.get('src'))
+        src = str(s.get('src'))
         return emotion.get_text(src)
     return False
 
 def is_video(s):
-    t = unicode(s.get('class'))
+    t = str(s.get('class'))
     if 'video' in t:
         url = s.find('a').get('href')
         return ' ' + getJumpUrl(url) + ' '
@@ -73,15 +73,15 @@ def other_case(s):
 
 # 发送请求到 jump.bdimg.com/.. 来获取真实链接
 # 阻止302跳转后可以大大节省时间 
-class RedirctHandler(urllib2.HTTPRedirectHandler):      
+class RedirctHandler(urllib.request.HTTPRedirectHandler):      
     def http_error_302(self, req, fp, code, msg, headers):  
         raise Exception(headers.getheaders('location')[0])
 
 def getJumpUrl(url):    
-    req = urllib2.Request(url)    
-    debug_handler = urllib2.HTTPHandler()    
-    opener = urllib2.build_opener(debug_handler, RedirctHandler)      
+    req = urllib.request.Request(url)    
+    debug_handler = urllib.request.HTTPHandler()    
+    opener = urllib.request.build_opener(debug_handler, RedirctHandler)      
     try:    
         opener.open(url)
-    except Exception, e:
-        return unicode(e)
+    except Exception as e:
+        return str(e)

@@ -67,7 +67,7 @@ class Command(crawl.Command):
         tbname = cfg.config['DEFAULT_TIEBA']
         if len(args) >= 1:
             tbname = args[0]
-        if isinstance(tbname, unicode):
+        if isinstance(tbname, str):
             tbname = tbname.encode('utf8')
             
         dbname = None    

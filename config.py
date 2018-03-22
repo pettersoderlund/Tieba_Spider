@@ -3,7 +3,7 @@
 import json
 import os
 import sys
-import MySQLdb
+import pymysql
 import warnings
 import time
 import csv
@@ -19,7 +19,7 @@ class config:
     def save(self):
         with open(self.config_path, 'wb') as f:
             s = json.dumps(self.config, indent=4, ensure_ascii=False)
-            if isinstance(s, unicode):
+            if isinstance(s, str):
                 s = s.encode('utf8')
             f.write(s)
 
@@ -61,11 +61,11 @@ def init_database(host, user, passwd, dbname):
     warnings.filterwarnings('ignore', message = "Table.*already exists") 
     warnings.filterwarnings('ignore', message = "Can't create.*database exists") 
     #都说了if not exists还报警告 = =
-    db = MySQLdb.connect(host, user, passwd)
+    db = pymysql.connect(host, user, passwd)
     tx = db.cursor()
     tx.execute('set names utf8mb4')
     tx.execute('create database if not exists `%s`default charset utf8mb4\
-    default collate utf8mb4_general_ci;' % MySQLdb.escape_string(dbname))
+    default collate utf8mb4_general_ci;' % pymysql.escape_string(dbname))
     #要用斜引号不然报错
     #万恶的MySQLdb会自动加上单引号 结果导致错误
     db.select_db(dbname)

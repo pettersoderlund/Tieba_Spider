@@ -3,9 +3,8 @@
 import scrapy
 import json
 from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
-import helper
+from . import helper
 import time
-import urlparse
 import logging
 from scrapy.utils.log import configure_logging
 
@@ -97,7 +96,7 @@ class TiebaSpider(scrapy.Spider):
             yield scrapy.Request(url, callback = self.parse_post, meta = meta)
 
     def parse_comment(self, response):
-        comment_list = json.loads(response.body)['data']['comment_list']
+        comment_list = json.loads(response.body_as_unicode())['data']['comment_list']
         for value in comment_list.values():
             comments = value['comment_info']
             for comment in comments:
