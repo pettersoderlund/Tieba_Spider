@@ -6,7 +6,7 @@
 ## 系统及依赖参考
 Ubuntu 14.04.4 64-bit
 
-Python 2.7.6
+Python 3
 
 mysql Ver 14.14 Distrib 5.5.53
 
@@ -18,7 +18,7 @@ Twisted (16.6.0)
 
 Scrapy 1.3.0
 
-MySQL-python (1.2.5)
+pymsql
 
 ## 使用方法
 先打开config.json文件，在其中配置好数据库的域名、用户名和密码。接着直接运行命令即可：

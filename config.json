@@ -1,9 +1,0 @@
-{
-    "MYSQL_USER": "root", 
-    "MYSQL_PASSWD": "123456", 
-    "DEFAULT_TIEBA": "仙五前修改", 
-    "MYSQL_DBNAME": {
-        "仙五前修改": "Pal5Q_Diy"
-    }, 
-    "MYSQL_HOST": "localhost"
-}

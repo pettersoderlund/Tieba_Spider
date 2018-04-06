@@ -70,24 +70,25 @@ def init_database(host, user, passwd, dbname):
     #万恶的MySQLdb会自动加上单引号 结果导致错误
     db.select_db(dbname)
     tx.execute("create table if not exists thread(\
-        id BIGINT(12), title VARCHAR(100), author VARCHAR(30), reply_num INT(4),\
-        good BOOL, PRIMARY KEY (id)) CHARSET=utf8mb4;")
+        thread_id BIGINT(12), forum_name VARCHAR(125), title VARCHAR(100),\
+        author VARCHAR(30), reply_num INT(4),\
+        good BOOL, PRIMARY KEY (thread_id)) CHARSET=utf8mb4;")
     tx.execute("create table if not exists post(\
-        id BIGINT(12), floor INT(4), author VARCHAR(30), content TEXT,\
+        post_id BIGINT(12), floor INT(4), author VARCHAR(30), content TEXT,\
         time DATETIME, comment_num INT(4), thread_id BIGINT(12),\
-        user_id BIGINT, PRIMARY KEY (id),\
-        FOREIGN KEY (thread_id) REFERENCES thread(id),\
+        user_id BIGINT, PRIMARY KEY (post_id),\
+        FOREIGN KEY (thread_id) REFERENCES thread(thread_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
         ) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists comment(id BIGINT(12),\
+    tx.execute("create table if not exists comment(comment_id BIGINT(12),\
         author VARCHAR(30), content TEXT, time DATETIME, post_id BIGINT(12),\
         user_id BIGINT,\
-        PRIMARY KEY (id), FOREIGN KEY (post_id) REFERENCES post(id),\
+        PRIMARY KEY (comment_id), FOREIGN KEY (post_id) REFERENCES post(post_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
         ) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists user(username VARCHAR(30),\
+    tx.execute("create table if not exists user(user_id BIGINT,\
+        username VARCHAR(30),\
         sex VARCHAR(6), years_registered FLOAT, posts_num INT(11),\
-        user_id BIGINT,\
         PRIMARY KEY (user_id)) CHARSET=utf8mb4;")
     db.commit()
     db.close()

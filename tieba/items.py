@@ -10,7 +10,8 @@ import scrapy
 
 class ThreadItem(scrapy.Item):
     name = 'thread'
-    id = scrapy.Field()
+    thread_id = scrapy.Field()
+    forum_name = scrapy.Field()
     title = scrapy.Field()
     author = scrapy.Field()
     reply_num = scrapy.Field()
@@ -18,7 +19,7 @@ class ThreadItem(scrapy.Item):
     
 class PostItem(scrapy.Item):
     name = 'post'
-    id = scrapy.Field()
+    post_id = scrapy.Field()
     floor = scrapy.Field()
     author = scrapy.Field()
     content = scrapy.Field()
@@ -29,7 +30,7 @@ class PostItem(scrapy.Item):
 
 class CommentItem(scrapy.Item):
     name = 'comment'
-    id = scrapy.Field()
+    comment_id = scrapy.Field()
     author = scrapy.Field()
     content = scrapy.Field()
     time = scrapy.Field()

@@ -5,8 +5,10 @@ import json
 from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
 from . import helper
 import time
-import logging
-from scrapy.utils.log import configure_logging
+
+#Used for debug
+#import logging
+#from scrapy.utils.log import configure_logging
 
 class TiebaSpider(scrapy.Spider):
     name = "tieba"
@@ -15,19 +17,20 @@ class TiebaSpider(scrapy.Spider):
     filter = None
     see_lz = False
     
-    configure_logging(install_root_handler=False)
+    # Used for debug
+    """configure_logging(install_root_handler=False)
     logging.basicConfig(
         filename='log.txt',
         format='%(levelname)s: %(message)s',
         level=logging.INFO
-    )    
-    
+    )"""    
     
     def parse(self, response): #forum parser
         for sel in response.xpath('//li[contains(@class, "j_thread_list")]'):
             data = json.loads(sel.xpath('@data-field').extract_first())
             item = ThreadItem()
-            item['id'] = data['id']
+            item['thread_id'] = data['id']
+            item['forum_name'] = self._parse_forum_name(response)
             item['author'] = data['author_name']
             item['reply_num'] = data['reply_num']
             item['good'] = data['is_good']
@@ -57,7 +60,7 @@ class TiebaSpider(scrapy.Spider):
             if not helper.is_ad(floor):
                 data = json.loads(floor.xpath("@data-field").extract_first())
                 item = PostItem()
-                item['id'] = data['content']['post_id']
+                item['post_id'] = data['content']['post_id']
                 item['author'] = data['author']['user_name']
                 item['comment_num'] = data['content']['comment_num']
                 if item['comment_num'] > 0:
@@ -101,7 +104,7 @@ class TiebaSpider(scrapy.Spider):
             comments = value['comment_info']
             for comment in comments:
                 item = CommentItem()
-                item['id'] = comment['comment_id']
+                item['comment_id'] = comment['comment_id']
                 item['author'] = comment['username']
                 item['post_id'] = comment['post_id']
                 item['content'] = helper.parse_content(comment['content'], False)
@@ -145,4 +148,8 @@ class TiebaSpider(scrapy.Spider):
             return True
         except ValueError:
             return False
- 
+
+    def _parse_forum_name(self, response):
+        tieba_name = response.xpath("//div[@class='card_title']/a[contains(@class, 'card_title_fname')]/text()").extract_first().strip()#xx吧
+        return tieba_name[:-1]#xx
+
