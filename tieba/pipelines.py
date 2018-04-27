@@ -9,7 +9,7 @@ from twisted.enterprise import adbapi
 import pymysql
 import pymysql.cursors
 from urllib.parse import quote
-from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
+from tieba.items import ThreadItem, PostItem, CommentItem, UserItem, ImageItem
 
 class TiebaPipeline(object):
     @classmethod
@@ -58,7 +58,8 @@ class TiebaPipeline(object):
             'thread': self.insert_thread, 
             'post': self.insert_post, 
             'comment': self.insert_comment,
-            'user': self.insert_user
+            'user': self.insert_user,
+            'image': self.insert_image
         }
         query = self.dbpool.runInteraction(_conditional_insert[item.name], item)
         query.addErrback(self._handle_error, item, spider)
@@ -89,6 +90,12 @@ class TiebaPipeline(object):
         tx.execute('set names utf8mb4')
         sql = "insert into user values(%s, %s, %s, %s, %s) on duplicate key update posts_num=values(posts_num)"
         params = (item["user_id"], item["username"], item['sex'], item['years_registered'], item['posts_num'])
+        tx.execute(sql, params)
+
+    def insert_image(self, tx, item):
+        tx.execute('set names utf8mb4')
+        sql = "insert into image values(%s, %s, %s) on duplicate key update url=values(url), post_id = values(post_id)"
+        params = (item["image_id"], item["post_id"], item["url"])
         tx.execute(sql, params)
 
     #错误处理方法

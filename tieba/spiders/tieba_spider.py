@@ -2,7 +2,7 @@
 
 import scrapy
 import json
-from tieba.items import ThreadItem, PostItem, CommentItem, UserItem
+from tieba.items import ThreadItem, PostItem, CommentItem, UserItem, ImageItem
 from . import helper
 import time
 
@@ -68,6 +68,12 @@ class TiebaSpider(scrapy.Spider):
                 content = floor.xpath(".//div[contains(@class,'j_d_post_content')]").extract_first()
                 #以前的帖子, data-field里面没有content
                 item['content'] = helper.parse_content(content, True)
+                
+                images = helper.get_images(content, True)
+                if len(images) > 0:
+                    for image in images:
+                        yield self.parse_image(image_url = image, post_id = item['post_id'],image_index = images.index(image))
+
                 #以前的帖子, data-field里面没有thread_id
                 item['thread_id'] = meta['thread_id']
                 item['floor'] = data['content']['post_no'] 
@@ -123,6 +129,13 @@ class TiebaSpider(scrapy.Spider):
             item['posts_num'] = self._parse_user_posts_num(response)
             item['user_id'] = response.xpath("//a[contains(@class, 'btn_sendmsg')]/@href").extract_first()[15:]
             yield item
+
+    def parse_image(self, image_url, post_id, image_index):
+        item = ImageItem()
+        item['url'] = image_url
+        item['post_id'] = post_id
+        item['image_id'] = str(post_id) + 'i' + str(image_index)
+        return item
 
     def _parse_user_age(self, response):
         """Helper function tp get user age on tieba

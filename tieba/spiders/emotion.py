@@ -23,3 +23,4 @@ def get_text(url):
             if flag:
                 return '[' + emotion['text'][index] + ']'
     return ' ' + url + ' '
+

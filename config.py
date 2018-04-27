@@ -90,6 +90,10 @@ def init_database(host, user, passwd, dbname):
         username VARCHAR(30),\
         sex VARCHAR(6), years_registered FLOAT, posts_num INT(11),\
         PRIMARY KEY (user_id)) CHARSET=utf8mb4;")
+    tx.execute("create table if not exists image(image_id varchar(30),\
+        post_id BIGINT, url TEXT,\
+        PRIMARY KEY (image_id), FOREIGN KEY (post_id) REFERENCES post(post_id)\
+        ) CHARSET=utf8mb4;")
     db.commit()
     db.close()
     warnings.resetwarnings()

@@ -16,5 +16,6 @@ ITEM_PIPELINES = {
 }
 
 LOG_LEVEL = 'WARNING'
+#LOG_LEVEL = 'DEBUG'
 
 COMMANDS_MODULE = 'tieba.commands'

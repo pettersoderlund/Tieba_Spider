@@ -45,3 +45,9 @@ class UserItem(scrapy.Item):
     posts_num = scrapy.Field()
     user_id = scrapy.Field()
 
+class ImageItem(scrapy.Item):
+    name = 'image'
+    image_id = scrapy.Field()
+    post_id = scrapy.Field()
+    url = scrapy.Field()
+

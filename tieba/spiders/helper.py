@@ -33,6 +33,24 @@ def parse_content(content, is_post):
 
     return strip_blank(''.join(l))
 
+def get_images(content, is_post):
+    if not content or not content.strip():
+        return None
+    content = content.replace('\r', '\n') 
+    s = BeautifulSoup(content, 'lxml')
+    if is_post:
+        s = s.div  #post 外层有个div
+
+    l = list(s.children)
+    images = list()
+    for i in range(len(l)):
+        obj = is_img(l[i])
+        if obj:
+            # test if emoji -- they are translated [emoji] in is_img
+            if obj[0] != '[':
+                images.append(obj)
+    return images
+
 def strip_blank(s): #按个人喜好去掉空白字符
     s = re.sub(r'\n[ \t]+\n', '\n', s)
     s = re.sub(r'  +', ' ', s) #去掉多余的空格
