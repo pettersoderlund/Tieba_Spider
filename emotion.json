@@ -1,6 +1,6 @@
 [
 	{
-		"regex": "http://static.tieba.baidu.com/tb/editor/images/client/image_emoticon([0-9]+)",
+		"regex": "/tb/editor/images/client/image_emoticon([0-9]+)",
 		"emotion_list": [
 			{
 				"text": ["\u5475\u5475", "\u54C8\u54C8", "\u5410\u820C", "\u554A", "\u9177", "\u6012", "\u5F00\u5FC3", "\u6C57", "\u6CEA", "\u9ED1\u7EBF", "\u9119\u89C6", "\u4E0D\u9AD8\u5174", "\u771F\u68D2", "\u94B1", "\u7591\u95EE", "\u9634\u9669", "\u5410", "\u54A6", "\u59D4\u5C48", "\u82B1\u5FC3", "\u547C~", "\u7B11\u773C", "\u51B7", "\u592A\u5F00\u5FC3", "\u6ED1\u7A3D", "\u52C9\u5F3A", "\u72C2\u6C57", "\u4E56", "\u7761\u89C9", "\u60CA\u54ED", "\u5347\u8D77", "\u60CA\u8BB6", "\u55B7", "\u7231\u5FC3", "\u5FC3\u788E", "\u73AB\u7470", "\u793C\u7269", "\u5F69\u8679", "\u661F\u661F\u6708\u4EAE", "\u592A\u9633", "\u94B1\u5E01", "\u706F\u6CE1", "\u8336\u676F", "\u86CB\u7CD5", "\u97F3\u4E50", "haha", "\u80DC\u5229", "\u5927\u62C7\u6307", "\u5F31", "OK"],
@@ -10,7 +10,7 @@
 	},
 	
 	{
-		"regex": "http://tb2.bdstatic.com/tb/editor/images/(.*?)/.*?([0-9]+)",
+		"regex": "/tb/editor/images/(.*?)/.*?([0-9]+)",
 		"emotion_list": [
 			{
 				"text": ["\u5475\u5475", "\u54C8\u54C8", "\u5410\u820C", "\u554A", "\u9177", "\u6012", "\u5F00\u5FC3", "\u6C57", "\u6CEA", "\u9ED1\u7EBF", "\u9119\u89C6", "\u4E0D\u9AD8\u5174", "\u771F\u68D2", "\u94B1", "\u7591\u95EE", "\u9634\u9669", "\u5410", "\u54A6", "\u59D4\u5C48", "\u82B1\u5FC3", "\u547C~", "\u7B11\u773C", "\u51B7", "\u592A\u5F00\u5FC3", "\u6ED1\u7A3D", "\u52C9\u5F3A", "\u72C2\u6C57", "\u4E56", "\u7761\u89C9", "\u60CA\u54ED", "\u5347\u8D77", "\u60CA\u8BB6", "\u55B7", "\u7231\u5FC3", "\u5FC3\u788E", "\u73AB\u7470", "\u793C\u7269", "\u5F69\u8679", "\u661F\u661F\u6708\u4EAE", "\u592A\u9633", "\u94B1\u5E01", "\u706F\u6CE1", "\u8336\u676F", "\u86CB\u7CD5", "\u97F3\u4E50", "haha", "\u80DC\u5229", "\u5927\u62C7\u6307", "\u5F31", "OK", "\u4F24\u5FC3", "\u52A0\u6CB9", "\u5FC5\u80DC", "\u671F\u5F85", "\u725B\u903C", "\u80DC\u5229", "\u8DDF\u4E2B\u6B7B\u78D5", "\u8E22\u7403", "\u9762\u58C1", "\u9876", "\u5DF4\u897F\u6012", "\u4F34\u821E", "\u5954\u8DD1", "\u70B9\u8D5E\u624B", "\u52A0\u6CB9", "\u54ED\u6CE3", "\u4EAE\u7EA2\u724C", "\u7403\u8FF7", "\u8036", "\u8F6C\u5C41\u80A1"],
