@@ -69,6 +69,10 @@ def init_database(host, user, passwd, dbname):
     #要用斜引号不然报错
     #万恶的MySQLdb会自动加上单引号 结果导致错误
     db.select_db(dbname)
+    tx.execute("create table if not exists user(user_id BIGINT,\
+        username VARCHAR(30),\
+        sex VARCHAR(6), years_registered FLOAT, posts_num INT(11),\
+        PRIMARY KEY (user_id)) CHARSET=utf8mb4;")
     tx.execute("create table if not exists thread(\
         thread_id BIGINT(12), forum_name VARCHAR(125), title VARCHAR(100),\
         author VARCHAR(30), reply_num INT(4),\
@@ -86,10 +90,6 @@ def init_database(host, user, passwd, dbname):
         PRIMARY KEY (comment_id), FOREIGN KEY (post_id) REFERENCES post(post_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
         ) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists user(user_id BIGINT,\
-        username VARCHAR(30),\
-        sex VARCHAR(6), years_registered FLOAT, posts_num INT(11),\
-        PRIMARY KEY (user_id)) CHARSET=utf8mb4;")
     tx.execute("create table if not exists image(image_id varchar(30),\
         post_id BIGINT, url TEXT,\
         PRIMARY KEY (image_id), FOREIGN KEY (post_id) REFERENCES post(post_id)\
