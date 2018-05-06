@@ -46,7 +46,9 @@ def get_images(content, is_post):
     for i in range(len(l)):
         obj = is_img(l[i])
         if obj:
-            # test if emoji -- they are translated [emoji] in is_img
+            obj = obj.strip()
+            # test if image is identified as an emoji 
+            # -- identified emojis are translated [emoji] in is_img
             if obj[0] != '[':
                 images.append(obj)
     return images
@@ -86,8 +88,6 @@ def is_video(s):
 #粗体红字之类的都一句话搞定了
 def other_case(s): 
     return s.get_text()
-
-
 
 # 发送请求到 jump.bdimg.com/.. 来获取真实链接
 # 阻止302跳转后可以大大节省时间 

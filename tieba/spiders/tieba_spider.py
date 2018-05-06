@@ -72,7 +72,7 @@ class TiebaSpider(scrapy.Spider):
                 images = helper.get_images(content, True)
                 if len(images) > 0:
                     for image in images:
-                        yield self.parse_image(image_url = image, post_id = item['post_id'],image_index = images.index(image))
+                        yield self.parse_image(image_url=image, post_id=item['post_id'],image_index=images.index(image))
 
                 #以前的帖子, data-field里面没有thread_id
                 item['thread_id'] = meta['thread_id']
@@ -121,7 +121,7 @@ class TiebaSpider(scrapy.Spider):
                 yield scrapy.Request(url, callback = self.parse_user)
 
     def parse_user(self, response):
-        if response.url != 'http://static.tieba.baidu.com/tb/error.html?ErrType=1': 
+        if 'error.html' not in response.url:
             item = UserItem()
             item['username'] = response.xpath("//span[@class='userinfo_username ']/text()").extract_first()
             item['sex'] = response.xpath("//div[@class='userinfo_userdata']/span[1]/@class").extract_first()[26:]

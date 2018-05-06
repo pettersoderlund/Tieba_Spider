@@ -15,7 +15,7 @@ ITEM_PIPELINES = {
     'tieba.pipelines.TiebaPipeline': 300,
 }
 
-LOG_LEVEL = 'WARNING'
-#LOG_LEVEL = 'DEBUG'
+#LOG_LEVEL = 'WARNING'
+LOG_LEVEL = 'DEBUG'
 
 COMMANDS_MODULE = 'tieba.commands'
