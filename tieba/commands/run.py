@@ -63,6 +63,10 @@ class Command(crawl.Command):
         self.settings.set('MYSQL_HOST', cfg.config['MYSQL_HOST'])
         self.settings.set('MYSQL_USER', cfg.config['MYSQL_USER'])
         self.settings.set('MYSQL_PASSWD', cfg.config['MYSQL_PASSWD'])
+        self.settings.set('MYSQL_USE_SSL', cfg.config['MYSQL_USE_SSL'])
+        self.settings.set('MYSQL_SSL_CHECK_HOSTNAME', cfg.config['MYSQL_SSL_CHECK_HOSTNAME'])
+        self.settings.set('MYSQL_SSL_CA_PATH', cfg.config['MYSQL_SSL_CA_PATH'])
+        
         
         tbname = cfg.config['DEFAULT_TIEBA']
         if len(args) >= 1:
@@ -82,8 +86,23 @@ class Command(crawl.Command):
             
         self.settings.set('TIEBA_NAME', tbname, priority='cmdline')
         self.settings.set('MYSQL_DBNAME', dbname, priority='cmdline')
+
+        use_ssl = False
+        ssl_check_hostname = False
+
+        if cfg.config['MYSQL_USE_SSL'] == 'True':
+            use_ssl = True
         
-        config.init_database(cfg.config['MYSQL_HOST'], cfg.config['MYSQL_USER'], cfg.config['MYSQL_PASSWD'], dbname)
+        if cfg.config['MYSQL_SSL_CHECK_HOSTNAME'] == 'False':
+            ssl_check_hostname = False
+        else: 
+            ssl_check_hostname = True
+        
+        config.init_database(cfg.config['MYSQL_HOST'],\
+            cfg.config['MYSQL_USER'], cfg.config['MYSQL_PASSWD'], dbname,\
+            use_ssl = use_ssl, ssl_check_hostname = ssl_check_hostname,\
+            ssl_ca = cfg.config['MYSQL_SSL_CA_PATH'])
+
         
         log = config.log(tbname, dbname, self.settings['BEGIN_PAGE'], opts.good_only, opts.see_lz)
         self.settings.set('SIMPLE_LOG', log)

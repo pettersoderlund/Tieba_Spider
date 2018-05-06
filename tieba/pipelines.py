@@ -26,6 +26,14 @@ class TiebaPipeline(object):
         if isinstance(tbname, str):
             settings['TIEBA_NAME'] = tbname.encode('utf8')
 
+        ssl = None
+        if settings['MYSQL_USE_SSL']:
+            ssl_check_hostname = True
+            if settings['MYSQL_SSL_CHECK_HOSTNAME'] == 'False': 
+                ssl_check_hostname = False
+            ssl = {'ca' : settings['MYSQL_SSL_CA_PATH'],\
+                   'check_hostname' : ssl_check_hostname }
+
         self.settings = settings
         
         self.dbpool = adbapi.ConnectionPool('pymysql',
@@ -33,6 +41,7 @@ class TiebaPipeline(object):
             db=settings['MYSQL_DBNAME'],
             user=settings['MYSQL_USER'],
             passwd=settings['MYSQL_PASSWD'],
+            ssl = ssl,
             charset='utf8mb4',
             cursorclass = pymysql.cursors.DictCursor,
             init_command = 'set foreign_key_checks=0' #异步容易冲突

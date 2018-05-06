@@ -1,5 +1,7 @@
 config.json
+*.pem
 *.pyc
 *.log
 log.txt
+targets
 

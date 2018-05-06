@@ -57,11 +57,15 @@ class log:
             csvwriter.writerow([start_time, end_time, elapsed_time, tbname, self.dbname, pages, self.etc])
         
         
-def init_database(host, user, passwd, dbname):
+def init_database(host, user, passwd, dbname, use_ssl = False, ssl_check_hostname = False, ssl_ca = None):
     warnings.filterwarnings('ignore', message = "Table.*already exists") 
     warnings.filterwarnings('ignore', message = "Can't create.*database exists") 
     #都说了if not exists还报警告 = =
-    db = pymysql.connect(host, user, passwd)
+    ssl = None
+    if use_ssl:
+        ssl = {'ca' : ssl_ca, 'check_hostname' : ssl_check_hostname }
+
+    db = pymysql.connect(host, user, passwd, ssl=ssl)
     tx = db.cursor()
     tx.execute('set names utf8mb4')
     tx.execute('create database if not exists `%s`default charset utf8mb4\

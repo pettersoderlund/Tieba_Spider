@@ -5,5 +5,8 @@
     "MYSQL_DBNAME": {
         "仙五前修改": "Pal5Q_Diy"
     }, 
-    "MYSQL_HOST": "localhost"
+    "MYSQL_HOST": "localhost",
+    "MYSQL_SSL_CA_PATH": "/path/to/ca/ca.pem",
+    "MYSQL_USE_SSL": "False",
+    "MYSQL_SSL_CHECK_HOSTNAME": "False"
 }
