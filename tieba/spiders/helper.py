@@ -19,9 +19,13 @@ def parse_content(content, is_post):
     if is_post:
         s = s.div  #post 外层有个div
 
-    l = list(s.children)
+    if(s.name == '[document]'):
+        l = list(s.body.children)
+    else:
+        l = list(s.children)
+
     for i in range(len(l)):
-        parse_func = (is_str, is_br, is_img, is_video, other_case)
+        parse_func = (is_str, is_br, is_img, is_video, is_script, other_case)
         for func in parse_func:
             try:
                 ret = func(l[i])
@@ -41,7 +45,11 @@ def get_images(content, is_post):
     if is_post:
         s = s.div  #post 外层有个div
 
-    l = list(s.children)
+    if(s.name == '[document]'):
+        l = list(s.body.children)
+    else:
+        l = list(s.children)
+
     images = list()
     for i in range(len(l)):
         obj = is_img(l[i])
@@ -80,6 +88,11 @@ def is_video(s):
     if 'video' in t:
         url = s.find('a').get('href')
         return ' ' + getJumpUrl(url) + ' '
+    return False
+
+def is_script(s):
+    if s.name == 'script':
+        return '[javascript]'
     return False
 
 #bs带的get_text功能，很好很强大

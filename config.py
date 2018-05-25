@@ -26,7 +26,7 @@ class config:
 class log:
     log_path = 'spider.log'
     
-    def __init__(self, tbname, dbname, begin_page, good_only, see_lz):
+    def __init__(self, tbname, dbname, begin_page, good_only = None, see_lz = None):
         if not os.path.isfile(self.log_path):
             with open(self.log_path, 'w') as f:
                 csvwriter = csv.writer(f, delimiter='\t')
@@ -57,7 +57,8 @@ class log:
             csvwriter.writerow([start_time, end_time, elapsed_time, tbname, self.dbname, pages, self.etc])
         
         
-def init_database(host, user, passwd, dbname, use_ssl = False, ssl_check_hostname = False, ssl_ca = None):
+def init_database(host, user, passwd, dbname, use_ssl=False,\
+        ssl_check_hostname=False, ssl_ca=None, spider_type='tieba'):
     warnings.filterwarnings('ignore', message = "Table.*already exists") 
     warnings.filterwarnings('ignore', message = "Can't create.*database exists") 
     #都说了if not exists还报警告 = =
@@ -73,31 +74,59 @@ def init_database(host, user, passwd, dbname, use_ssl = False, ssl_check_hostnam
     #要用斜引号不然报错
     #万恶的MySQLdb会自动加上单引号 结果导致错误
     db.select_db(dbname)
-    tx.execute("create table if not exists user(user_id BIGINT,\
-        username VARCHAR(30),\
+    user_sql = "create table if not exists user(user_id BIGINT,\
+        username VARCHAR(125),\
         sex VARCHAR(6), years_registered FLOAT, posts_num INT(11),\
-        PRIMARY KEY (user_id)) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists thread(\
-        thread_id BIGINT(12), forum_name VARCHAR(125), title VARCHAR(100),\
-        author VARCHAR(30), reply_num INT(4),\
-        good BOOL, PRIMARY KEY (thread_id)) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists post(\
-        post_id BIGINT(12), floor INT(4), author VARCHAR(30), content TEXT,\
+        PRIMARY KEY (user_id)) CHARSET=utf8mb4;"
+    thread_sql = "create table if not exists thread(\
+        thread_id BIGINT(12), forum_name VARCHAR(125), title VARCHAR(125),\
+        author VARCHAR(125), reply_num INT(4),\
+        good BOOL, PRIMARY KEY (thread_id)) CHARSET=utf8mb4;"
+    post_sql = "create table if not exists post(\
+        post_id BIGINT(12), floor INT(4), author VARCHAR(125), content TEXT,\
         time DATETIME, comment_num INT(4), thread_id BIGINT(12),\
         user_id BIGINT, PRIMARY KEY (post_id),\
         FOREIGN KEY (thread_id) REFERENCES thread(thread_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
-        ) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists comment(comment_id BIGINT(12),\
-        author VARCHAR(30), content TEXT, time DATETIME, post_id BIGINT(12),\
+        ) CHARSET=utf8mb4;"
+    comment_sql = "create table if not exists comment(comment_id BIGINT(12),\
+        author VARCHAR(125), content TEXT, time DATETIME, post_id BIGINT(12),\
         user_id BIGINT,\
         PRIMARY KEY (comment_id), FOREIGN KEY (post_id) REFERENCES post(post_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
-        ) CHARSET=utf8mb4;")
-    tx.execute("create table if not exists image(image_id varchar(30),\
+        ) CHARSET=utf8mb4;"
+    image_sql = "create table if not exists image(image_id varchar(30),\
         post_id BIGINT, url TEXT,\
         PRIMARY KEY (image_id), FOREIGN KEY (post_id) REFERENCES post(post_id)\
-        ) CHARSET=utf8mb4;")
+        ) CHARSET=utf8mb4;"
+    
+    if(spider_type == 'pantip'):
+        thread_sql = "create table if not exists thread(\
+            thread_id BIGINT(12), forum_name VARCHAR(125), title VARCHAR(125),\
+            author VARCHAR(125), reply_num INT(4),\
+            good BOOL, tags TEXT, PRIMARY KEY (thread_id)) CHARSET=utf8mb4;"
+        post_sql = "create table if not exists post(\
+            post_id BIGINT(12), floor INT(4), author VARCHAR(125), content TEXT,\
+            time DATETIME, comment_num INT(4), thread_id BIGINT(12),\
+            user_id BIGINT,ipv4 VARCHAR(45), ipv6 VARCHAR(45), likecount INT,\
+            emotioncount INT, PRIMARY KEY (post_id),\
+            FOREIGN KEY (thread_id) REFERENCES thread(thread_id),\
+            FOREIGN KEY (user_id) REFERENCES user(user_id)\
+            ) CHARSET=utf8mb4;"
+        comment_sql = "create table if not exists comment(comment_id BIGINT(12),\
+            author VARCHAR(125), content TEXT, time DATETIME, post_id BIGINT(12),\
+            user_id BIGINT, ipv4 VARCHAR(45), ipv6 VARCHAR(45), likecount INT,\
+            emotioncount INT,\
+            PRIMARY KEY (comment_id), FOREIGN KEY (post_id) REFERENCES post(post_id),\
+            FOREIGN KEY (user_id) REFERENCES user(user_id)\
+            ) CHARSET=utf8mb4;"
+
+    tx.execute(user_sql)
+    tx.execute(thread_sql)
+    tx.execute(post_sql)
+    tx.execute(comment_sql)
+    tx.execute(image_sql)
+    
     db.commit()
     db.close()
     warnings.resetwarnings()

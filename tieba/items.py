@@ -51,3 +51,22 @@ class ImageItem(scrapy.Item):
     post_id = scrapy.Field()
     url = scrapy.Field()
 
+# Pantip
+class PantipThreadItem(ThreadItem):
+    name = 'pantipthread';
+    tags = scrapy.Field();
+
+class PantipPostItem(PostItem):
+    name = 'pantippost'
+    ipv4 = scrapy.Field()
+    ipv6 = scrapy.Field()
+    likecount = scrapy.Field()
+    emotioncount = scrapy.Field()
+
+class PantipCommentItem(CommentItem):
+    name = 'pantipcomment'
+    ipv4 = scrapy.Field()
+    ipv6 = scrapy.Field()
+    likecount = scrapy.Field()
+    emotioncount = scrapy.Field()
+
