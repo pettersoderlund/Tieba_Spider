@@ -148,7 +148,8 @@ class TiebaSpider(scrapy.Spider):
         character 万indicates 10000 posts. 
         :returns: numberofposts int
         """
-        num = scrapy.Selector(response).css('.userinfo_userdata span:nth-child(4)::text').extract_first()[3:] # 发贴:(X)X.X万
+        num = scrapy.Selector(response).css('.userinfo_userdata span:nth-child(4)::text').extract_first() # 发贴:(X)X.X万
+        num = num[num.find(":")+1:]
         
         if num:
             return num if self._is_number(num) is True else float(num[:-1]) * 10000
