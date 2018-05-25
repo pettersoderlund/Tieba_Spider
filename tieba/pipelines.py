@@ -52,7 +52,10 @@ class TiebaPipeline(object):
         spider.end_page = self.settings['END_PAGE']
         spider.filter = self.settings['FILTER']
         spider.see_lz = self.settings['SEE_LZ']
-        start_url = "http://tieba.baidu.com/f?kw=%s&pn=%d" \
+        if(spider.name == 'pantip'):
+            start_url = 'http://pantip.com/tag/%s'%(quote(self.settings['TIEBA_NAME']))
+        else: 
+            start_url = "http://tieba.baidu.com/f?kw=%s&pn=%d" \
                 %(quote(self.settings['TIEBA_NAME']), 50 * (begin_page - 1))
         if self.settings['GOOD_ONLY']:
             start_url += '&tab=good'
@@ -68,7 +71,10 @@ class TiebaPipeline(object):
             'post': self.insert_post, 
             'comment': self.insert_comment,
             'user': self.insert_user,
-            'image': self.insert_image
+            'image': self.insert_image,
+            'pantipthread': self.insert_pantipthread,
+            'pantippost': self.insert_pantippost, 
+            'pantipcomment': self.insert_pantipcomment
         }
         query = self.dbpool.runInteraction(_conditional_insert[item.name], item)
         query.addErrback(self._handle_error, item, spider)
@@ -105,6 +111,29 @@ class TiebaPipeline(object):
         tx.execute('set names utf8mb4')
         sql = "insert into image values(%s, %s, %s) on duplicate key update url=values(url), post_id = values(post_id)"
         params = (item["image_id"], item["post_id"], item["url"])
+        tx.execute(sql, params)
+
+    def insert_pantipthread(self, tx, item):
+        sql = "insert into thread values(%s, %s, %s, %s, %s, %s, %s) on duplicate key\
+        update reply_num=values(reply_num), good=values(good)"
+        params = (item["thread_id"], item["forum_name"], item["title"], item['author'], item['reply_num'], item['good'], item['tags'])
+        tx.execute(sql, params)     
+
+    def insert_pantippost(self, tx, item):
+        sql = "insert into post values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) on duplicate key\
+        update content=values(content), comment_num=values(comment_num)"
+        params = (item["post_id"], item["floor"], item['author'], item['content'], 
+            item['time'], item['comment_num'], item['thread_id'], item['user_id'],
+            item['ipv4'], item['ipv6'], item['likecount'], item['emotioncount'])
+        tx.execute(sql, params)
+        
+    def insert_pantipcomment(self, tx, item):
+        tx.execute('set names utf8mb4')
+        sql = "insert into comment values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)\
+                on duplicate key update content=values(content)"
+        params = (item["comment_id"], item['author'], item['content'],\
+                item['time'], item['post_id'], item['user_id'],
+                item['ipv4'], item['ipv6'], item['likecount'], item['emotioncount'])            
         tx.execute(sql, params)
 
     #错误处理方法
