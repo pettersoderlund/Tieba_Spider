@@ -1,24 +1,17 @@
 # Tieba_Spider
-Tieba Crawler. Please delete the original log spider.log after updating.
+Tieba Crawler. 
 
 ## Updates
-20180928 - Started to translate readme with help from Google translate.
+20180928 - Started to translate readme from chinese to english with help from Google translate. Posts are sometimes marked as "floor" where the 1st floor is the thread initiator. 2nd floor is the first answer and so on. 
 
 ## System and dependency reference
 Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-133-generic x86_64)
-
 Python 3.5.2
-
 mysql  Ver 14.14 Distrib 5.7.23
-
 lxml==4.2.1
-
 beautifulsoup4==4.6.0
-
 Twisted==17.9.0
-
 Scrapy==1.5.0
-
 PyMySQL==0.8.0
 
 See full list in requirements.txt
@@ -32,112 +25,130 @@ The tieba forum name does not include the word "吧" at the end, and the databas
 ```
 scrapy run 仙五前修改 Pal5Q_Diy
 ```
-若在config.json里面已经配置好贴吧名和对应数据库名，则可以忽略数据库名。若忽略贴吧名，则爬取config.json里面DEFAULT的数据库。
+If you have configured the name of the paste and the corresponding database name in config.json, you can ignore the database name. If you ignore the name of the post, then crawl the database of DEFAULT in config.json.
 
-**特别提醒** 任务一旦断开，不可继续进行。因此SSH打开任务时，请保证不要断开连接，或者考虑使用后台任务或者screen命令等。
+**Special Reminder** Once the mission is disconnected, you cannot proceed. Therefore, when SSH opens a task, please ensure that you do not disconnect, or consider using background tasks or screen commands.
 
-## 选项说明
+## Options Description
 
-|短形式|长形式     |参数个数|作用                              |举例                           |
+|Short form|Long form     |Number of arguments|Function                              |Example                           |
 |------|-----------|--------|----------------------------------|-------------------------------|
-|-p    |--pages    |2       |设定爬取帖子的开始页和结束页      |scrapy run ... -p 2 5          |
-|-g    |--good_only|0       |只爬精品帖                        |scrapy run ... -g              |
-|-s    |--see_lz   |0       |只看楼主，即不爬非楼主的楼层      |scrapy run ... -s              |
-|-f    |--filter   |1       |设定帖子过滤函数名(见`filter.py`) |scrapy run ... -f thread_filter| 
+|-p    |--pages    |2       |Set the start and end pages of the crawled post     |scrapy run ... -p 2 5          |
+|-g    |--good_only|0       |Only climb the boutique posts (??? translators edit) |scrapy run ... -g              |
+|-s    |--see_lz   |0       |Look at the landlord, that is, not climbing the floor of the non-landlord (??? translators edit |scrapy run ... -s              |
+|-f    |--filter   |1       |Set post filter function name (see `filter.py`)|scrapy run ... -f thread_filter| 
 
-举例：
+Example：
 ```
 scrapy run 仙剑五外传 -gs -p 5 12 -f thread_filter
 ```
-使用只看楼主模式爬仙剑五外传吧精品帖中第5页到第12页的帖子，其中能通过过滤器`filter.py`中的`thread_filter`函数的帖子及其内容会被存入数据库。
+Use only look at the landlord mode to climb the fairy sword five outside the best posts in the fifth page to the 12th post, which can pass the `filter_py` function in the `filter_py` function and its contents will be stored in the database.
 
-## 数据处理
-对爬取的数据并非原样入库，会进行一些处理。
+## Data processing
+The data that is crawled is not stored in the same way, and some processing will be performed.
 
-1. 广告楼层会被去掉(右下角有“广告”两字的楼层)。
-2. 加粗和红字效果丢失为纯文本(beautifulsoup的get_text功能)。
-3. 常用表情会转换为文字表达(emotion.json，欢迎补充)。
-4. 图片和视频会变成对应链接(要获取视频链接需要拿到一个302响应)。
+1.  The ad posts will be removed (the posts with the word "advertising" in the lower right corner).
+2. The bold and red characters are lost to plain text (the get_text function of the beautifulsoup).
+3. Common expressions will be converted to text expressions (emotion.json, welcome to add).
+4. The picture and video will become the corresponding link (to get a video link you need to get a 302 response).
 
-## 数据保存结构
+## Data saving structure
  - thread
  
-为各帖子的一些基本信息。
+Some basic information for each post.
 
-|属性     |类型        |备注                                                    |
+|Column      |Types        |Remarks                                                     |
 |---------|------------|--------------------------------------------------------|
-|id       |BIGINT(12)  |"http://tieba.baidu.com/p/4778655068" 的ID就是4778655068|
+|thread_id       |BIGINT(12)  |"http://tieba.baidu.com/p/4778655068"  has the ID of 4778655068|
 |title    |VARCHAR(100)|                                                        |
 |author   |VARCHAR(30) |                                                        |
-|reply_num|INT(4)      |回复数量(含楼中楼, 不含1楼)                             |
-|good     |BOOL        |是否为精品帖                                            |
-
+|reply_num|INT(4)      |Reply quantity               |
+|good     |BOOL        |Whether it is a boutique post                                           |
+|last_seen|datetime|For continuous scraping this is a date when the element was last scraped|
+|times_seen|datetime|For continuous scraping this is a counter for the number of times the element has been scraped|
 
  - post
 
-为各楼层的一些基本信息，包括1楼。
+Some basic information for each post/floor, including the first floor.
 
-|属性       |类型       |备注                  |
+|Column | Types |Remarks |
 |-----------|-----------|----------------------|
-|id         |BIGINT(12) |楼层也有对应ID        |
-|floor      |INT(4)     |楼层编号              |
-|author     |VARCHAR(30)|                      |
-|content    |TEXT       |楼层内容              |
-|time       |DATETIME   |发布时间              |
-|comment_num|INT(4)     |楼中楼回复数量        |
-|thread_id  |BIGINT(12) |楼层的主体帖子ID，外键|
+|post_id |BIGINT(12) |The floor also has a corresponding ID |
+|floor |INT(4)|floor number |
+|author |VARCHAR(30)| |
+|content |TEXT | Floor Content |
+|time |DATETIME |Published time |
+|comment_num|INT(4) |Reward number of buildings in the building |
+|thread_id |BIGINT(12) |The main post ID of the floor, foreign key|
+|user_id|bigint(20)||
+|last_seen|datetime|For continuous scraping this is a date when the element was last scraped|
+|times_seen|datetime|For continuous scraping this is a counter for the number of times the element has been scraped|
+
 
 
  - comment
  
-楼中楼的一些信息。
+Some information about the building in the middle of the building.
 
-|属性   |类型       |备注                      |
+|Column | Types |Remarks |
 |-------|-----------|--------------------------|
-|id     |BIGINT(12) |楼中楼也有ID，且和楼层共用|
-|author |VARCHAR(30)|                          |
-|content|TEXT       |楼中楼内容                |
-|time   |DATETIME   |发布时间                  |
-|post_id|BIGINT(12) |楼中楼的主体楼层ID，外键  |
+|comment_id |BIGINT(12) |The building has an ID and is shared with the floor|
+|author |VARCHAR(30)| |
+|content|TEXT |Floor Building Content |
+|time |DATETIME |Published time |
+|post_id|BIGINT(12) | Main floor ID of the building, foreign key |
+|user_id|bigint(20)||
+|last_seen|datetime|For continuous scraping this is a date when the element was last scraped|
+|times_seen|datetime|For continuous scraping this is a counter for the number of times the element has been scraped|
 
-爬取方式决定了comment有可能先于对应的post被爬取，从而外键错误。因此任务开始阶段数据库的外键检测会被关闭。
 
-## 耗时参考
-耗时和服务器带宽以及爬取时段有关，下面是我的阿里云服务器对几个贴吧的爬取用时，仅供参考。
+The crawling method determines that the comment may be crawled before the corresponding post, and the foreign key is wrong. Therefore, the foreign key detection of the database at the beginning of the task will be closed.
 
-|贴吧名    |帖子数|回复数 |楼中楼数|用时(秒)|
+- image
+Links to images in posts 
+
+|Column | Types |Remarks |
+|-------|-----------|--------------------------|
+|image_id|varchar(30)||
+|post_id|bigint(20)||
+|url|text||
+
+
+- user
+Information about users
+
+|Column | Types |Remarks |
+|-------|-----------|--------------------------|
+|user_id|bigint(20)||
+|username|varchar(125)||
+|sex|varchar(6)||
+|years_registered|float|Year count on tieba|
+|posts_num|int(11)|Number of posts on tieba|
+
+
+## Time-consuming reference
+Time-consuming is related to server bandwidth and crawl time. Below is the time when my Alibaba Cloud server crawls several stickers. It is for reference only.
+
+| Post bar name | Posts number | Reply number | Floor number of buildings | Time (seconds) |
 |----------|------|-------|--------|--------|
 |pandakill |3638  |41221  |50206   |222.2   |
 |lyingman  |11290 |122662 |126670  |718.9   |
 |仙剑五外传|67356 |1262705|807435  |7188    |
 
-下面几个吧是同一时刻爬取的：
+The following are the crawls at the same time:
 
-|贴吧名     |帖子数|回复数|楼中楼数|用时(秒)|
+| Post bar name | Posts number|Reply number|Floor number of buildings|Time (seconds)|
 |-----------|------|------|--------|--------|
 |仙五前修改 |530   |3518  |7045    |79.02   |
 |仙剑3高难度|2080  |21293 |16185   |274.6   |
 |古剑高难度 |1703  |26086 |32941   |254.0   |
 
-**特别提醒** 请注意下爬取数据的占用空间，别把磁盘占满了。
-
-## 参考文献
-[Scrapy 1.0 文档][1]
-
-[Scrapy 源代码][2]
-
-[Beautiful Soup的用法][3]
-
-[Ubuntu/Debian 安装lxml的正确方式][4]
-
-[Twisted adbapi 源代码][5]
-
-有什么问题或建议欢迎到[我的主页][6]留言~
+**Special Reminder** Please pay attention to the space occupied by crawling data, do not fill the disk.
 
 
-  [1]: http://scrapy-chs.readthedocs.io/zh_CN/1.0/
-  [2]: https://coding.net/u/fmyl/p/scrapy
-  [3]: https://cuiqingcai.com/1319.html
-  [4]: http://www.cnblogs.com/numbbbbb/p/3434519.html
-  [5]: https://github.com/twisted/twisted/blob/twisted-16.5.0/src/twisted/enterprise/adbapi.py
-  [6]: http://aqua.hk.cn
+# Pantip spider
+There is a crawler for the www.pantip.com forum as well in this project, built in the same fashion as the Tieba spider. It uses the same database configuration. 
+It is run by the command:
+```
+scrapy run_pantip <pantip keyword> <database>
+```
