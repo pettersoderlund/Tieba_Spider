@@ -1,31 +1,34 @@
 # Tieba_Spider
-贴吧爬虫。更新后请先删除原有的日志`spider.log`。
+Tieba Crawler. Please delete the original log spider.log after updating.
 
-2017.3.23更新：修改了页选项参数形式，增加了只看楼主、只爬精品和自定义过滤帖子功能。
+## Updates
+20180928 - Started to translate readme with help from Google translate.
 
-## 系统及依赖参考
-Ubuntu 14.04.4 64-bit
+## System and dependency reference
+Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-133-generic x86_64)
 
-Python 3
+Python 3.5.2
 
-mysql Ver 14.14 Distrib 5.5.53
+mysql  Ver 14.14 Distrib 5.7.23
 
-lxml (3.7.2)
+lxml==4.2.1
 
-beautifulsoup4 (4.5.3)
+beautifulsoup4==4.6.0
 
-Twisted (16.6.0)
+Twisted==17.9.0
 
-Scrapy 1.3.0
+Scrapy==1.5.0
 
-pymsql
+PyMySQL==0.8.0
 
-## 使用方法
-先打开config.json文件，在其中配置好数据库的域名、用户名和密码。接着直接运行命令即可：
+See full list in requirements.txt
+
+## Instructions
+First open the config.json file, configure the domain name, username and password of the database. Then run the command directly:
 ```
-scrapy run <贴吧名> <数据库名> <选项>
+Scrapy run <tieba forum name> <database name> [option]
 ```
-其中贴吧名不含末尾的“吧”字，而数据库名则是要存入的数据库名字，数据库在爬取前会被创建。例如
+The tieba forum name does not include the word "吧" at the end, and the database name is the name of the database to be stored. The database will be created before crawling. E.g
 ```
 scrapy run 仙五前修改 Pal5Q_Diy
 ```
