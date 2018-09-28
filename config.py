@@ -81,17 +81,17 @@ def init_database(host, user, passwd, dbname, use_ssl=False,\
     thread_sql = "create table if not exists thread(\
         thread_id BIGINT(12), forum_name VARCHAR(125), title VARCHAR(125),\
         author VARCHAR(125), reply_num INT(4),\
-        good BOOL, PRIMARY KEY (thread_id)) CHARSET=utf8mb4;"
+        good BOOL, last_seen DATETIME, times_seen INT, PRIMARY KEY (thread_id)) CHARSET=utf8mb4;"
     post_sql = "create table if not exists post(\
         post_id BIGINT(12), floor INT(4), author VARCHAR(125), content TEXT,\
         time DATETIME, comment_num INT(4), thread_id BIGINT(12),\
-        user_id BIGINT, PRIMARY KEY (post_id),\
+        user_id BIGINT, last_seen DATETIME, times_seen INT, PRIMARY KEY (post_id),\
         FOREIGN KEY (thread_id) REFERENCES thread(thread_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
         ) CHARSET=utf8mb4;"
     comment_sql = "create table if not exists comment(comment_id BIGINT(12),\
         author VARCHAR(125), content TEXT, time DATETIME, post_id BIGINT(12),\
-        user_id BIGINT,\
+        user_id BIGINT, last_seen DATETIME, times_seen INT,\
         PRIMARY KEY (comment_id), FOREIGN KEY (post_id) REFERENCES post(post_id),\
         FOREIGN KEY (user_id) REFERENCES user(user_id)\
         ) CHARSET=utf8mb4;"

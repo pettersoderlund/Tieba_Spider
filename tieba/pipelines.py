@@ -81,15 +81,15 @@ class TiebaPipeline(object):
         return item
         
     def insert_thread(self, tx, item):
-        sql = "insert into thread values(%s, %s, %s, %s, %s, %s) on duplicate key\
-        update reply_num=values(reply_num), good=values(good)"
+        sql = "insert into thread values(%s, %s, %s, %s, %s, %s, now(), 1) on duplicate key\
+        update reply_num=values(reply_num), good=values(good), last_seen=values(last_seen), times_seen=times_seen+1"
         # 回复数量和是否精品有可能变化，其余一般不变
         params = (item["thread_id"], item["forum_name"], item["title"], item['author'], item['reply_num'], item['good'])
         tx.execute(sql, params)     
         
     def insert_post(self, tx, item):
-        sql = "insert into post values(%s, %s, %s, %s, %s, %s, %s, %s) on duplicate key\
-        update content=values(content), comment_num=values(comment_num)"
+        sql = "insert into post values(%s, %s, %s, %s, %s, %s, %s, %s, now(), 1) on duplicate key\
+        update content=values(content), comment_num=values(comment_num), last_seen=values(last_seen), times_seen=times_seen+1"
         # 楼中楼数量和content(解析方式)可能变化，其余一般不变
         params = (item["post_id"], item["floor"], item['author'], item['content'], 
             item['time'], item['comment_num'], item['thread_id'], item['user_id'])
@@ -97,7 +97,7 @@ class TiebaPipeline(object):
         
     def insert_comment(self, tx, item):
         tx.execute('set names utf8mb4')
-        sql = "insert into comment values(%s, %s, %s, %s, %s, %s) on duplicate key update content=values(content)"
+        sql = "insert into comment values(%s, %s, %s, %s, %s, %s, now(), 1) on duplicate key update content=values(content), last_seen=values(last_seen), times_seen=times_seen+1"
         params = (item["comment_id"], item['author'], item['content'], item['time'], item['post_id'], item['user_id'])
         tx.execute(sql, params)
         
