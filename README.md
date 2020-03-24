@@ -16,6 +16,15 @@ PyMySQL==0.8.0
 
 See full list in requirements.txt
 
+## Installation
+### Prerequisites
+Python3
+A mysql database
+
+# Installing python packages
+Run the following command in a terminal to install related packages. Make sure pip is pointing to your python3 installation. 
+$pip install -r requirements.txt
+
 ## Instructions
 First open the config.json file, configure the domain name, username and password of the database. Then run the command directly:
 ```
