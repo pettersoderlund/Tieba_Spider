@@ -21,7 +21,7 @@ See full list in requirements.txt
 Python3
 A mysql database
 
-# Installing python packages
+### Installing python packages
 Run the following command in a terminal to install related packages. Make sure pip is pointing to your python3 installation. 
 $pip install -r requirements.txt
 
